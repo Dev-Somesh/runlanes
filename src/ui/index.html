@@ -7,19 +7,19 @@
 <style>
 :root{
   --bg:#080B0F; --panel:#0D1218; --panel-2:#111823; --grid:#151E29;
-  --line:#1E2A38; --ink:#DDE5E9; --dim:#6E8291; --faint:#3D4C5A;
+  --line:#1E2A38; --ink:#DDE5E9; --dim:#9AABB7; --faint:#7E8F9C;
   --signal:#3DDC97; --alert:#FF6B4A; --warn:#FFC24B; --cyan:#38BDF8; --violet:#A78BFA;
 }
 @media (prefers-color-scheme:light){
   :root{
     --bg:#F2F4F3; --panel:#FFF; --panel-2:#F7F9F8; --grid:#E4E9E7;
-    --line:#D3D8D6; --ink:#10161F; --dim:#5C6B72; --faint:#AAB6BC;
+    --line:#D3D8D6; --ink:#10161F; --dim:#47555C; --faint:#5C6B72;
     --signal:#0E6E5C; --alert:#B4432B; --warn:#8A6410; --cyan:#0E7490; --violet:#6D28D9;
   }
 }
 *{box-sizing:border-box}
 html{background:var(--bg)}
-body{margin:0;background:var(--bg);color:var(--ink);font-size:13px;line-height:1.55;
+body{margin:0;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.6;
   font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;
   -webkit-font-smoothing:antialiased;
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
@@ -32,13 +32,13 @@ header{padding:26px 0 0}
   background:var(--panel);padding:12px 16px}
 .bar h1{margin:0;font-size:.95rem;font-weight:700;letter-spacing:.02em}
 .bar .proj{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.95rem;font-weight:700;letter-spacing:.01em}
-.bar .sub{color:var(--dim);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase}
-.live{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:.68rem;color:var(--dim)}
-.ex{color:var(--dim);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
+.bar .sub{color:var(--dim);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase}
+.live{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--dim)}
+.ex{color:var(--dim);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;
   border:1px solid var(--line);padding:4px 8px}
 .ex:hover{color:var(--ink)}
 .docq{width:100%;max-width:420px;border:1px solid var(--line);background:var(--panel);color:var(--ink);
-  padding:8px 12px;font:inherit;font-size:.7rem;margin:0 0 14px}
+  padding:8px 12px;font:inherit;font-size:.78rem;margin:0 0 14px}
 .docq:focus{outline:1px solid var(--signal);outline-offset:0}
 .beacon{width:8px;height:8px;border-radius:50%;background:var(--signal)}
 .beacon.err{background:var(--alert)} .beacon.stale{background:var(--warn)}
@@ -52,7 +52,7 @@ header{padding:26px 0 0}
 
 .tabs{display:flex;margin:18px 0 0;border-bottom:1px solid var(--line)}
 .tabs button{background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;
-  padding:9px 16px;font-family:inherit;font-size:.74rem;font-weight:700;letter-spacing:.08em;
+  padding:9px 16px;font-family:inherit;font-size:.78rem;font-weight:700;letter-spacing:.08em;
   text-transform:uppercase;color:var(--dim);cursor:pointer}
 .tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--signal)}
 .tabs button:focus-visible{outline:1px solid var(--signal);outline-offset:-2px}
@@ -62,50 +62,50 @@ header{padding:26px 0 0}
   border:1px solid var(--line);background:var(--panel);margin-bottom:18px}
 .stat{padding:12px 15px;border-right:1px solid var(--line)}
 .stat:last-child{border-right:0}
-.stat .k{display:block;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
+.stat .k{display:block;font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:6px}
 .stat .v{font-family:ui-sans-serif,system-ui,sans-serif;font-size:1.45rem;font-weight:700;letter-spacing:-.02em;line-height:1}
-.stat .s{display:block;font-size:.63rem;color:var(--dim);margin-top:5px}
+.stat .s{display:block;font-size:.78rem;color:var(--dim);margin-top:5px}
 
 .card{border:1px solid var(--line);background:var(--panel);padding:14px 16px 8px;margin-bottom:18px}
-.card h2{margin:0 0 2px;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
-.card .hint{font-size:.63rem;color:var(--faint);margin:0 0 12px;max-width:80ch;line-height:1.6}
+.card h2{margin:0 0 2px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card .hint{font-size:.82rem;color:var(--faint);margin:0 0 12px;max-width:80ch;line-height:1.6}
 svg{display:block;width:100%}
 
 .run{border:1px solid var(--line);background:var(--panel);margin-bottom:10px}
 .run .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 15px;
   border-bottom:1px solid var(--line);background:var(--panel-2)}
 .run .top h3{margin:0;font-size:.85rem;font-weight:600}
-.rid{color:var(--faint);font-size:.62rem;margin-left:auto}
+.rid{color:var(--faint);font-size:.78rem;margin-left:auto}
 .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:11px 18px;padding:12px 15px}
-.kv .k{display:block;font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
-.kv .v{font-size:.8rem}
-.files{padding:0 15px 12px;font-size:.63rem;color:var(--dim);line-height:1.8}
-.files b{display:block;font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:6px 0 2px}
-.tag{font-size:.57rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;
+.kv .k{display:block;font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);margin-bottom:2px}
+.kv .v{font-size:.88rem}
+.files{padding:0 15px 12px;font-size:.80rem;color:var(--dim);line-height:1.8}
+.files b{display:block;font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:6px 0 2px}
+.tag{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;
   border:1px solid currentColor;color:var(--dim);white-space:nowrap}
 .tag.running{color:var(--signal)} .tag.kind{color:var(--cyan)} .tag.model{color:var(--violet)}
 
 .clash{border:1px solid var(--alert);background:var(--panel);padding:12px 15px;margin:0 0 18px}
-.clash h2{margin:0 0 8px;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--alert)}
+.clash h2{margin:0 0 8px;font-size:.78rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--alert)}
 .clash .f{font-size:.86rem;font-weight:600;color:var(--ink);margin-bottom:3px}
-.clash .who{font-size:.68rem;color:var(--dim);line-height:1.75}
+.clash .who{font-size:.84rem;color:var(--dim);line-height:1.75}
 .clash .who b{color:var(--ink);font-weight:600}
 .clash .row{padding:7px 0;border-top:1px solid var(--grid)}
 .clash .row:first-of-type{border-top:0}
 .clash pre{margin:7px 0 0;padding:7px 10px;background:var(--panel-2);border:1px solid var(--line);
-  overflow-x:auto;font-size:.66rem;color:var(--dim)}
-.clash .why{font-size:.63rem;color:var(--faint);margin:9px 0 0;line-height:1.65;max-width:80ch}
-.note{border-left:2px solid var(--warn);padding:3px 0 3px 14px;margin:0 0 16px;font-size:.71rem;color:var(--dim);line-height:1.7}
+  overflow-x:auto;font-size:.78rem;color:var(--dim)}
+.clash .why{font-size:.80rem;color:var(--faint);margin:9px 0 0;line-height:1.65;max-width:80ch}
+.note{border-left:2px solid var(--warn);padding:3px 0 3px 14px;margin:0 0 16px;font-size:.82rem;color:var(--dim);line-height:1.7}
 .note b{color:var(--ink)}
-.empty{padding:34px 0;text-align:center;color:var(--dim);font-size:.76rem}
+.empty{padding:34px 0;text-align:center;color:var(--dim);font-size:.78rem}
 .hs{border-top:1px solid var(--line);padding:13px 0 6px}.hs:first-child{border-top:0}
 .hh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}
 .hh b{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.78rem}
-.hh .m{font-size:.64rem;color:var(--dim)}
+.hh .m{font-size:.78rem;color:var(--dim)}
 .hr2{display:grid;grid-template-columns:minmax(140px,1.5fr) 84px minmax(80px,2fr) 70px 56px;
-  gap:10px;align-items:center;padding:3px 0;font-size:.69rem}
+  gap:10px;align-items:center;padding:3px 0;font-size:.80rem}
 .hr2 .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hr2 .ty{color:var(--cyan);font-size:.58rem;letter-spacing:.09em;text-transform:uppercase}
+.hr2 .ty{color:var(--cyan);font-size:.78rem;letter-spacing:.09em;text-transform:uppercase}
 .hr2 .bar2{height:7px;background:var(--grid)}.hr2 .bar2 i{display:block;height:100%}
 .hr2 .tk,.hr2 .du{color:var(--dim);text-align:right}
 @media(max-width:640px){.stat{border-right:0;border-bottom:1px solid var(--line)}
@@ -115,21 +115,21 @@ svg{display:block;width:100%}
   .doclist{position:static!important;max-height:none!important}}
 .doclist{position:sticky;top:16px;max-height:calc(100vh - 40px);overflow:auto;
   border:1px solid var(--line);background:var(--panel)}
-.doclist b{display:block;padding:9px 12px 5px;font-size:.57rem;letter-spacing:.15em;
+.doclist b{display:block;padding:9px 12px 5px;font-size:.78rem;letter-spacing:.15em;
   text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
 .doclist button{display:block;width:100%;text-align:left;background:none;border:0;
   border-bottom:1px solid var(--grid);padding:8px 12px;cursor:pointer;
-  font-family:inherit;font-size:.7rem;color:var(--dim)}
+  font-family:inherit;font-size:.78rem;color:var(--dim)}
 .doclist button:hover{color:var(--ink)}
 .doclist button[aria-current=true]{color:var(--signal);border-left:2px solid var(--signal);padding-left:10px}
-.doclist small{display:block;color:var(--faint);font-size:.58rem;margin-top:1px}
+.doclist small{display:block;color:var(--faint);font-size:.78rem;margin-top:1px}
 #doc{border:1px solid var(--line);background:var(--panel);padding:20px 24px;
   font-family:ui-serif,Georgia,serif;font-size:15px;line-height:1.65;font-variant-numeric:normal}
-#doc .src{font-family:ui-monospace,monospace;font-size:.62rem;color:var(--faint);
+#doc .src{font-family:ui-monospace,monospace;font-size:.78rem;color:var(--faint);
   padding-bottom:4px}
-#doc .used{font-size:.68rem;color:var(--dim);border-bottom:1px solid var(--line);
+#doc .used{font-size:.78rem;color:var(--dim);border-bottom:1px solid var(--line);
   padding:0 0 10px;margin:0 0 16px;line-height:1.7}
-#doc .used b{display:block;font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;
+#doc .used b{display:block;font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;
   color:var(--faint);margin:6px 0 4px}
 #doc .used button{background:none;border:0;padding:0;font:inherit;color:var(--signal);
   cursor:pointer;text-align:left}
@@ -146,29 +146,29 @@ svg{display:block;width:100%}
 #doc hr{border:0;border-top:1px solid var(--line);margin:22px 0}
 #doc table{border-collapse:collapse;width:100%;font-size:.82rem;margin:0 0 14px;
   font-family:ui-monospace,monospace}
-#doc th{font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
+#doc th{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);
   text-align:left;padding:0 12px 6px 0;border-bottom:1px solid var(--line)}
 #doc td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
 #doc a{color:var(--signal)}
 .scroll{overflow-x:auto}
-footer{padding:34px 0 0;font-size:.62rem;color:var(--faint);line-height:1.9}
+footer{padding:34px 0 0;font-size:.78rem;color:var(--faint);line-height:1.9}
 
 .access{border:1px solid var(--line);border-top:0;background:var(--panel);padding:10px 16px 12px}
 .access .row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 8px}
-.access .k{font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+.access .k{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
 .across{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px}
-.chip{border:1px solid var(--line);padding:6px 10px;font-size:.68rem;color:var(--ink);background:var(--panel-2)}
+.chip{border:1px solid var(--line);padding:6px 10px;font-size:.78rem;color:var(--ink);background:var(--panel-2)}
 .chip .m{color:var(--violet)}
 .chip .on{color:var(--signal)}
 .urls{list-style:none;margin:0;padding:0}
 .urls li{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,2fr) auto;gap:8px 12px;
-  align-items:center;padding:7px 0;border-top:1px solid var(--grid);font-size:.7rem}
+  align-items:center;padding:7px 0;border-top:1px solid var(--grid);font-size:.78rem}
 .urls li:first-child{border-top:0}
 .urls .rel{color:var(--dim)}
 .urls .u{color:var(--ink);word-break:break-all}
 .urls .u.off{color:var(--faint)}
 .urls button,.act{appearance:none;background:var(--panel-2);color:var(--ink);border:1px solid var(--line);
-  font:inherit;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;cursor:pointer;
+  font:inherit;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;padding:8px 12px;cursor:pointer;
   min-height:40px}
 .urls button:hover,.act:hover{border-color:var(--ink)}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
@@ -177,8 +177,8 @@ footer{padding:34px 0 0;font-size:.62rem;color:var(--faint);line-height:1.9}
 .note.confirm button{margin:8px 8px 0 0}
 .sess{margin:0 0 22px}
 .sess .sh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 8px;
-  font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
-.sess .sh b{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.8rem;letter-spacing:0;
+  font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.sess .sh b{font-family:ui-sans-serif,system-ui,sans-serif;font-size:.80rem;letter-spacing:0;
   text-transform:none;color:var(--ink)}
 @media(max-width:640px){
   .urls li{grid-template-columns:1fr auto}
@@ -279,6 +279,7 @@ tabs.forEach(t=>t.addEventListener("click",()=>{
 function setStatus(t,s){document.getElementById("status").textContent=t;
   beacon.className="beacon"+(s==="error"?" err":s==="stale"?" stale":"")}
 function pulse(){bar.classList.remove("pulse");void bar.offsetWidth;bar.classList.add("pulse")}
+const cut=(s,n)=>s.length>n?s.slice(0,n-1)+"…":s;
 const tone=r=>r.status==="running"?"var(--signal)":/opus/.test(r.model||"")?"var(--violet)"
   :r.kind==="Explore"?"var(--cyan)":r.kind==="Plan"?"var(--warn)":"var(--cyan)";
 
@@ -392,19 +393,23 @@ function timeline(runs){
   const t0=Math.min(...rs.map(r=>+new Date(r.startedAt)));
   const t1=Math.max(...rs.map(r=>+new Date(r.lastActivityAt||r.startedAt)));
   const span=Math.max(t1-t0,1000);
-  const padL=176,padR=88,rowH=32,top=26;
+  // Monospace, so a label's width is knowable. Deriving the cut from the
+  // gutter and the type size means a future size change cannot clip it.
+  const lblPx=12.5,chW=lblPx*0.62;
+  const padL=212,padR=88,rowH=32,top=26;
+  const lblMax=Math.max(8,Math.floor((padL-16)/chW));
   const W=Math.max(720,(svg.parentElement?.clientWidth||900)-2),plot=W-padL-padR;
   const H=top+rs.length*rowH+18,x=t=>padL+((+new Date(t)-t0)/span)*plot;
   let s="";
   for(let i=0;i<=4;i++){const px=padL+plot*i/4;
     s+=`<line x1="${px}" y1="${top-8}" x2="${px}" y2="${H-12}" stroke="var(--grid)"/>`;
-    s+=`<text x="${px}" y="${top-13}" fill="var(--faint)" font-size="9" text-anchor="middle">+${Math.round(span*i/4/1000)}s</text>`}
+    s+=`<text x="${px}" y="${top-13}" fill="var(--faint)" font-size="11.5" text-anchor="middle">+${Math.round(span*i/4/1000)}s</text>`}
   rs.forEach((r,i)=>{const y=top+i*rowH+11,x1=x(r.startedAt),x2=Math.max(x(r.lastActivityAt||r.startedAt),x1+3),c=tone(r);
-    s+=`<text x="${padL-12}" y="${y+3.5}" fill="var(--dim)" font-size="10" text-anchor="end">${esc((r.name||"").slice(0,24))}</text>`;
+    s+=`<text x="${padL-12}" y="${y+3.5}" fill="var(--dim)" font-size="${lblPx}" text-anchor="end">${esc(cut(r.name||"",lblMax))}</text>`;
     s+=`<rect x="${x1}" y="${y-5}" width="${x2-x1}" height="10" fill="${c}" opacity="${r.status==="running"?".95":".55"}"/>`;
     s+=`<circle cx="${x1}" cy="${y}" r="3" fill="${c}"/>`;
     if(r.status==="running")s+=`<circle cx="${x2}" cy="${y}" r="4" fill="none" stroke="${c}"><animate attributeName="r" values="4;9" dur="1.6s" repeatCount="indefinite"/><animate attributeName="opacity" values="1;0" dur="1.6s" repeatCount="indefinite"/></circle>`;
-    s+=`<text x="${x2+8}" y="${y+3.5}" fill="var(--dim)" font-size="9">${tok(r,"tokens")}</text>`});
+    s+=`<text x="${x2+8}" y="${y+3.5}" fill="var(--dim)" font-size="11.5">${tok(r,"tokens")}</text>`});
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("height",H);svg.innerHTML=s;
 }
 
@@ -421,22 +426,22 @@ function graph(runs,shared,el,compact,collide){
   const aW=Math.min(300,W*.34),aX=pad,fX=Math.round(W*.52);
   const ay=i=>top+i*rowH+rowH/2,idx=new Map(runs.map((r,i)=>[r.id,i]));
   let s="";
-  if(!compact){s+=`<text x="${aX}" y="16" fill="var(--faint)" font-size="9" letter-spacing="1.4">RUNS</text>`;
-    s+=`<text x="${fX}" y="16" fill="var(--faint)" font-size="9" letter-spacing="1.4">SHARED FILES</text>`}
+  if(!compact){s+=`<text x="${aX}" y="16" fill="var(--faint)" font-size="11.5" letter-spacing="1.4">RUNS</text>`;
+    s+=`<text x="${fX}" y="16" fill="var(--faint)" font-size="11.5" letter-spacing="1.4">SHARED FILES</text>`}
   hubs.forEach((h,r)=>{const y2=ay(r),hit=hits.get(h.file);h.runs.forEach(id=>{const i=idx.get(id);if(i==null)return;
     const y1=ay(i),x1=aX+aW,x2=fX-10,mid=(x1+x2)/2,clash=hit&&hit.has(id);
     s+=`<path d="M${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}" fill="none" stroke="${clash?"var(--alert)":tone(runs[i])}" stroke-width="${clash?1.6:1}" opacity="${clash?.85:.28}"/>`})});
   runs.forEach((r,i)=>{const y=ay(i),c=tone(r),h=rowH-10;
     s+=`<rect x="${aX}" y="${y-h/2}" width="${aW}" height="${h}" fill="var(--panel-2)" stroke="var(--line)"/>`;
     s+=`<rect x="${aX}" y="${y-h/2}" width="3" height="${h}" fill="${c}"/>`;
-    const max=Math.floor((aW-104)/5.6),nm=(r.name||"").length>max?(r.name||"").slice(0,max-1)+"…":(r.name||"");
-    s+=`<text x="${aX+11}" y="${y+3.5}" fill="var(--ink)" font-size="10">${esc(nm)}</text>`;
-    s+=`<text x="${aX+aW-9}" y="${y+3.5}" fill="var(--dim)" font-size="8.5" text-anchor="end">${tok(r,"tokens")}</text>`});
+    const max=Math.floor((aW-112)/(11.5*0.62)),nm=cut(r.name||"",max);
+    s+=`<text x="${aX+11}" y="${y+3.5}" fill="var(--ink)" font-size="12.5">${esc(nm)}</text>`;
+    s+=`<text x="${aX+aW-9}" y="${y+3.5}" fill="var(--dim)" font-size="11" text-anchor="end">${tok(r,"tokens")}</text>`});
   hubs.forEach((h,r)=>{const y=ay(r),hit=hits.get(h.file);
     s+=`<circle cx="${fX-10}" cy="${y}" r="${hit?3.2:2.5}" fill="${hit?"var(--alert)":"var(--signal)"}"/>`;
-    s+=`<text x="${fX-20}" y="${y+3.5}" fill="var(--faint)" font-size="9" text-anchor="end">${h.runs.length}×</text>`;
-    s+=`<text x="${fX}" y="${y+3.5}" fill="${hit?"var(--alert)":"var(--ink)"}" font-size="9.5">${esc(h.file)}</text>`;
-    if(hit)s+=`<text x="${fX+(h.file||"").length*5.6+12}" y="${y+3.5}" fill="var(--alert)" font-size="8" letter-spacing=".8">BOTH WROTE WHILE BOTH RAN</text>`});
+    s+=`<text x="${fX-20}" y="${y+3.5}" fill="var(--faint)" font-size="11.5" text-anchor="end">${h.runs.length}×</text>`;
+    s+=`<text x="${fX}" y="${y+3.5}" fill="${hit?"var(--alert)":"var(--ink)"}" font-size="12">${esc(h.file)}</text>`;
+    if(hit)s+=`<text x="${fX+(h.file||"").length*11.5*0.62+14}" y="${y+3.5}" fill="var(--alert)" font-size="10.5" letter-spacing=".8">BOTH WROTE WHILE BOTH RAN</text>`});
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("preserveAspectRatio","xMinYMin meet");
   svg.setAttribute("height",H);svg.innerHTML=s;
 }

@@ -1,6 +1,6 @@
 {
   "name": "runlanes",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "See what your coding agents actually did — cost, concurrency, and which files each run touched. Reads local transcripts, sends nothing anywhere.",
   "type": "module",
   "bin": {
