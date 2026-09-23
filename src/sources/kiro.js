@@ -12,7 +12,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { statusFromLastWrite } from "./types.js";
+import { statusFromLastWrite, orderFileEvents } from "./types.js";
 import { repoRelative, filesFromCommand, sameProject, walkFiles, listMarkdown } from "./read.js";
 
 function defaultRoot() {
@@ -174,6 +174,7 @@ function parseSession(file, repoRoot, executions) {
   const history = Array.isArray(data.history) ? data.history : [];
   const reads = new Set();
   const writes = new Set();
+  const events = [];
   let toolCalls = 0;
   let turns = 0;
   let first = msIso(data.dateCreated);
@@ -200,8 +201,17 @@ function parseSession(file, repoRoot, executions) {
       if (action.actionType === "model" || action.actionType === "say") continue;
       if (action.actionType && action.actionType !== "intentClassification") toolCalls++;
       const files = filesFromAction(action, repoRoot);
-      for (const f of files.reads) reads.add(f);
-      for (const f of files.writes) writes.add(f);
+      // Kiro times the execution, not the actions inside it. Stamping every
+      // action with the execution's start would read as a measurement of when
+      // the write happened, which it is not.
+      for (const f of files.reads) {
+        reads.add(f);
+        events.push({ path: f, kind: "read", at: null });
+      }
+      for (const f of files.writes) {
+        writes.add(f);
+        events.push({ path: f, kind: "write", at: null });
+      }
     }
   }
 
@@ -227,6 +237,7 @@ function parseSession(file, repoRoot, executions) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth: 0,
   };

@@ -10,7 +10,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { statusFromLastWrite } from "./types.js";
+import { statusFromLastWrite, orderFileEvents } from "./types.js";
 import {
   readJsonl,
   readJsonlHead,
@@ -124,6 +124,7 @@ function parseRun(file, repoRoot) {
   let cacheReadTokens = 0;
   let toolCalls = 0;
   let turns = 0;
+  const events = [];
   let first = null;
   let last = null;
   let sawShutdown = false;
@@ -145,12 +146,20 @@ function parseRun(file, repoRoot) {
       const name = toolName(data);
       const args = toolArgs(data);
       const rel = repoRelative(repoRoot, args.path || args.file_path || args.filePath);
+      const at = rec.timestamp || null;
       if (WRITE_TOOLS.has(name)) {
-        if (rel) writes.add(rel);
+        if (rel) {
+          writes.add(rel);
+          events.push({ path: rel, kind: "write", at });
+        }
       } else if (name === "bash" || name === "shell" || name === "execute") {
-        for (const f of filesFromCommand(args.command || args.cmd, repoRoot)) reads.add(f);
+        for (const f of filesFromCommand(args.command || args.cmd, repoRoot)) {
+          reads.add(f);
+          events.push({ path: f, kind: "read", at });
+        }
       } else if (rel) {
         reads.add(rel);
+        events.push({ path: rel, kind: "read", at });
       }
     }
     if (t === "session.shutdown") {
@@ -196,6 +205,7 @@ function parseRun(file, repoRoot) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth: 0,
   };

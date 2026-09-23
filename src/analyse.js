@@ -65,7 +65,21 @@ export function collisions(runs) {
         widest = Math.max(widest, overlap);
       }
     }
-    if (hit.size > 1) out.push({ file, runs: [...hit], overlapMs: widest });
+    if (hit.size > 1) {
+      // Who landed on top. The run spans say the two were open at once; the
+      // write events say which one touched the file last, which is the thing
+      // somebody actually wants when they open the graph. Runners that do not
+      // stamp their tool calls contribute nothing here rather than a guess.
+      let lastWrite = null;
+      for (const run of runs) {
+        if (!hit.has(run.id)) continue;
+        for (const e of run.fileEvents || []) {
+          if (e.kind !== "write" || e.path !== file || !e.at) continue;
+          if (!lastWrite || e.at > lastWrite.at) lastWrite = { runId: run.id, at: e.at };
+        }
+      }
+      out.push({ file, runs: [...hit], overlapMs: widest, lastWrite });
+    }
   }
 
   return out.sort((a, b) => b.runs.length - a.runs.length || b.overlapMs - a.overlapMs || a.file.localeCompare(b.file));

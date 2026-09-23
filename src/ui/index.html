@@ -456,13 +456,18 @@ function renderClash(d,runs,many){
   const label=r=>r?((many&&r.sourceLabel?r.sourceLabel+" · ":"")+(r.name||r.id)):"a run since ended";
   const rows=hits.slice(0,4).map(h=>{
     const who=h.runs.map(id=>`<b>${esc(label(by.get(id)))}</b>`).join(" and ");
+    const lw=h.lastWrite&&by.get(h.lastWrite.runId);
+    const when=h.lastWrite?new Date(h.lastWrite.at).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):null;
+    // Who landed on top, when the runner stamped its writes. Silent otherwise,
+    // rather than naming whichever run happens to sort last.
+    const order=lw?` <b>${esc(label(lw))}</b> wrote last, at ${esc(when)}.`:"";
     return `<div class="row"><div class="f">${esc(h.file)}</div>`+
-      `<div class="who">${who} — both wrote it while both were running, overlapping ${dur(h.overlapMs)}.</div>`+
+      `<div class="who">${who} — both wrote it while both were running, overlapping ${dur(h.overlapMs)}.${order}</div>`+
       `<pre>git diff -- ${esc(h.file)}</pre></div>`;
   }).join("");
   const more=hits.length>4?`<div class="who" style="padding-top:7px">and ${hits.length-4} more.</div>`:"";
   box.innerHTML=`<div class="clash"><h2>${hits.length===1?"Collision":hits.length+" collisions"}</h2>${rows}${more}`+
-    `<p class="why">Neither run was working from a settled file. Which edit survived is not in the transcripts — `+
+    `<p class="why">Neither run was working from a settled file. Which run wrote last is recorded where the runner stamps its tool calls; which edit survived is not — `+
     `they record that a write was requested with a path, not the bytes on either side — so check the working tree rather than trusting either run's account of it.</p></div>`;
   box.hidden=false;
 }

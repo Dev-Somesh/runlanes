@@ -92,6 +92,49 @@ test("three runs on one file report every run involved once", () => {
   assert.deepEqual(found[0].runs.sort(), ["a", "b", "c"]);
 });
 
+// The spans say two runs were open at once. The write events say which one
+// landed on top, which is the question somebody actually has.
+test("a collision names the run that wrote last, from the stamped events", () => {
+  const a = { ...writing("a", "x.ts", 0, 60), fileEvents: [{ path: "x.ts", kind: "write", at: at(10) }] };
+  const b = { ...writing("b", "x.ts", 30, 90), fileEvents: [{ path: "x.ts", kind: "write", at: at(40) }] };
+  const [found] = collisions([a, b]);
+  assert.deepEqual(found.lastWrite, { runId: "b", at: at(40) });
+});
+
+test("the last writer is the latest write, not the run that ended latest", () => {
+  // b runs on longer but a came back and wrote again after it.
+  const a = { ...writing("a", "x.ts", 0, 60), fileEvents: [{ path: "x.ts", kind: "write", at: at(50) }] };
+  const b = { ...writing("b", "x.ts", 30, 90), fileEvents: [{ path: "x.ts", kind: "write", at: at(35) }] };
+  assert.equal(collisions([a, b])[0].lastWrite.runId, "a");
+});
+
+// Cursor stamps its user turns rather than its tool calls, and Kiro times an
+// execution rather than the actions inside it. Neither should be made to
+// produce an ordering it never recorded.
+test("an unstamped collision reports no last writer rather than guessing", () => {
+  const a = { ...writing("a", "x.ts", 0, 60), fileEvents: [{ path: "x.ts", kind: "write", at: null }] };
+  const b = { ...writing("b", "x.ts", 30, 90), fileEvents: [{ path: "x.ts", kind: "write", at: null }] };
+  assert.equal(collisions([a, b])[0].lastWrite, null);
+});
+
+test("a collision with no events at all still reports the collision", () => {
+  const [found] = collisions([writing("a", "x.ts", 0, 60), writing("b", "x.ts", 30, 90)]);
+  assert.equal(found.file, "x.ts");
+  assert.equal(found.lastWrite, null);
+});
+
+test("a write to another file does not become this file's last writer", () => {
+  const a = { ...writing("a", "x.ts", 0, 60), fileEvents: [{ path: "other.ts", kind: "write", at: at(59) }] };
+  const b = { ...writing("b", "x.ts", 30, 90), fileEvents: [{ path: "x.ts", kind: "write", at: at(40) }] };
+  assert.equal(collisions([a, b])[0].lastWrite.runId, "b");
+});
+
+test("a read is never the last writer", () => {
+  const a = { ...writing("a", "x.ts", 0, 60), fileEvents: [{ path: "x.ts", kind: "read", at: at(59) }] };
+  const b = { ...writing("b", "x.ts", 30, 90), fileEvents: [{ path: "x.ts", kind: "write", at: at(40) }] };
+  assert.equal(collisions([a, b])[0].lastWrite.runId, "b");
+});
+
 test("a run colliding on two files reports both", () => {
   const found = collisions([
     touching("a", { writes: ["x.ts", "y.ts"], startedAt: at(0), lastActivityAt: at(60) }),

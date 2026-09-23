@@ -10,7 +10,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { consumedTokens, statusFromLastWrite } from "./types.js";
+import { consumedTokens, statusFromLastWrite, orderFileEvents } from "./types.js";
 import { readJsonl, repoRelative, filesFromCommand } from "./read.js";
 
 const ROOT = path.join(os.homedir(), ".claude", "projects");
@@ -79,6 +79,7 @@ function parseRun(file, repoRoot) {
   let turns = 0;
   let first = null;
   let last = null;
+  const events = [];
 
   for (const rec of records) {
     if (rec.timestamp) {
@@ -101,8 +102,12 @@ function parseRun(file, repoRoot) {
       for (const b of msg.content) {
         if (b?.type !== "tool_use") continue;
         toolCalls++;
-        const target = WRITE_TOOLS.has(b.name) ? writes : reads;
-        for (const f of filesTouched(b, repoRoot)) target.add(f);
+        const kind = WRITE_TOOLS.has(b.name) ? "write" : "read";
+        const target = kind === "write" ? writes : reads;
+        for (const f of filesTouched(b, repoRoot)) {
+          target.add(f);
+          events.push({ path: f, kind, at: rec.timestamp || null });
+        }
       }
     }
   }
@@ -136,6 +141,7 @@ function parseRun(file, repoRoot) {
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
     writes: [...writes].sort(),
+    fileEvents: orderFileEvents(events),
     depth: meta?.spawnDepth ?? null,
   };
   cache.set(file, { mtime, value });

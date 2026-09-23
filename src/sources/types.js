@@ -67,7 +67,20 @@
  * @property {number|null} durationMs
  * @property {string[]} reads         Repo-relative paths.
  * @property {string[]} writes        Repo-relative paths.
+ * @property {FileEvent[]} [fileEvents]  The same contact, kept in the order the
+ *   runner recorded it. `reads` and `writes` say a run touched a path; this says
+ *   when, where the transcript was willing to say. Additive on purpose: the two
+ *   arrays above are public surface, in `--json`, in the `./sources` export and
+ *   in every snapshot already written.
  * @property {number|null} depth      Spawn depth, if known.
+ *
+ * @typedef {object} FileEvent
+ * @property {string} path            Repo-relative.
+ * @property {"read"|"write"} kind
+ * @property {string|null} at         ISO timestamp, or null when the runner did
+ *   not stamp the call. Null is the honest answer and not a zero: Cursor stamps
+ *   its user turns rather than its tool calls, and Kiro times an execution
+ *   rather than the actions inside it.
  *
  * @typedef {object} SessionTotals
  * @property {number} tokens
@@ -105,4 +118,28 @@ export const IDLE_MS = 90_000;
 export function statusFromLastWrite(lastActivityAt, now = Date.now()) {
   if (!lastActivityAt) return "finished";
   return now - new Date(lastActivityAt).getTime() < IDLE_MS ? "running" : "finished";
+}
+
+/**
+ * Puts a run's file contact in the order the transcript reported it.
+ *
+ * Adapters keep their own read and write sets, which are public surface and
+ * were not worth reshaping for this. They push an event beside each one and
+ * hand the pile here.
+ *
+ * @param {FileEvent[]} events
+ * @returns {FileEvent[]}
+ */
+export function orderFileEvents(events) {
+  const seen = new Set();
+  return events
+    .filter((e) => {
+      if (!e || !e.path) return false;
+      const k = `${e.kind}\u0000${e.path}\u0000${e.at || ""}`;
+      return seen.has(k) ? false : (seen.add(k), true);
+    })
+    .map((e) => ({ path: e.path, kind: e.kind, at: e.at || null }))
+    // Stamped events in order; unstamped keep the transcript's order behind
+    // them rather than claiming a position on the clock.
+    .sort((a, b) => (a.at && b.at ? a.at.localeCompare(b.at) : a.at ? -1 : b.at ? 1 : 0));
 }

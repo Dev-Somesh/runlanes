@@ -11,7 +11,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { statusFromLastWrite } from "./types.js";
+import { statusFromLastWrite, orderFileEvents } from "./types.js";
 import { readJsonl, repoRelative, filesFromCommand, listMarkdown } from "./read.js";
 
 const HOME =
@@ -123,6 +123,7 @@ function parseRun(file, repoRoot, { depth = 0, kind = null } = {}) {
   let cacheReadTokens = 0;
   let toolCalls = 0;
   let turns = 0;
+  const events = [];
   let first = iso(conv.startTime);
   let last = iso(conv.lastUpdated);
   let contextNow = 0;
@@ -151,7 +152,10 @@ function parseRun(file, repoRoot, { depth = 0, kind = null } = {}) {
     for (const call of calls) {
       toolCalls++;
       const target = WRITE_TOOLS.has(call.name) ? writes : reads;
-      for (const f of filesFromArgs(call.args, repoRoot)) target.add(f);
+      for (const f of filesFromArgs(call.args, repoRoot)) {
+        target.add(f);
+        events.push({ path: f, kind: target === writes ? "write" : "read", at: msg.timestamp || null });
+      }
     }
   }
 
@@ -177,6 +181,7 @@ function parseRun(file, repoRoot, { depth = 0, kind = null } = {}) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth,
     contextNow,

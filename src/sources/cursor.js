@@ -14,7 +14,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { statusFromLastWrite } from "./types.js";
+import { statusFromLastWrite, orderFileEvents } from "./types.js";
 import { readJsonl, repoRelative, filesFromCommand } from "./read.js";
 
 const ROOT = path.join(os.homedir(), ".cursor", "projects");
@@ -123,6 +123,7 @@ function parseRun(file, repoRoot, { depth, kind } = {}) {
   let turns = 0;
   let first = null;
   let last = null;
+  const events = [];
 
   for (const rec of records) {
     if (!model) model = extractModel(rec);
@@ -138,8 +139,15 @@ function parseRun(file, repoRoot, { depth, kind } = {}) {
     for (const b of content) {
       if (b?.type !== "tool_use") continue;
       toolCalls++;
-      const target = WRITE_TOOLS.has(b.name) ? writes : reads;
-      for (const f of filesTouched(b, repoRoot)) target.add(f);
+      const kind = WRITE_TOOLS.has(b.name) ? "write" : "read";
+      const target = kind === "write" ? writes : reads;
+      for (const f of filesTouched(b, repoRoot)) {
+        target.add(f);
+        // Cursor stamps its user turns, not its tool calls. Where this record
+        // carries no stamp the event says null rather than borrowing the last
+        // one seen, which would read as a measurement.
+        events.push({ path: f, kind, at: stamp || null });
+      }
     }
   }
 
@@ -169,6 +177,7 @@ function parseRun(file, repoRoot, { depth, kind } = {}) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth: depth ?? null,
   };

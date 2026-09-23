@@ -70,18 +70,23 @@ What landed is a question for `git`.
 Three limits are worth stating plainly, because the graph is a reason to go and
 look rather than an answer in itself:
 
-- **No ordering.** A run is linked to a path, not to a moment. Two runs that
-  touched the same file come back as an unordered pair, so which of them wrote
-  last is not something this can currently tell you.
+- **Ordering, where the runner stamps its tool calls.** Claude Code, Codex,
+  Gemini CLI and Copilot CLI stamp each call, so a collision names the run that
+  wrote last and when. Cursor stamps its user turns rather than its tool calls,
+  and Kiro times an execution rather than the actions inside it; for those the
+  console says nothing rather than borrowing a nearby timestamp.
 - **Nothing below the file.** A run is linked to a path, never to a hunk. Which
   agent wrote a particular line is out of reach.
 - **No intent.** The closest thing to it is the run's title, which is the
   prompt that opened the run, not what the run believed it was doing when it
   made a particular write.
 
-The first of those is fixable and is being worked on, because the timestamp is
-already in the transcript. The other two are not: no amount of reading
-transcripts recovers what a runner never wrote down.
+The last two are not fixable here. No amount of reading transcripts recovers
+what a runner never wrote down.
+
+Runs also carry `fileEvents`, the same contact in the order the runner recorded
+it, as `{ path, kind, at }` with `at` null where the call was not stamped.
+`reads` and `writes` are unchanged.
 
 A collision is time-sensitive, so it is also called out on the **Now** tab
 rather than only in the graph, naming both runs and the command that answers
