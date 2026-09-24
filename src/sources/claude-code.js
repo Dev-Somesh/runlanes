@@ -11,7 +11,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { consumedTokens, statusFromLastWrite, orderFileEvents } from "./types.js";
-import { readJsonl, repoRelative, filesFromCommand } from "./read.js";
+import { readJsonl, repoRelative, classifyCommand } from "./read.js";
 
 const ROOT = path.join(os.homedir(), ".claude", "projects");
 
@@ -42,15 +42,28 @@ function projectDir(cwd, root = ROOT) {
   }
 }
 
-function filesTouched(block, repoRoot) {
+/**
+ * What one tool call did, per path rather than per tool.
+ *
+ * The tool name settles its own arguments: Edit edits what it was given. It
+ * says nothing about a shell command, where one line can read one file and
+ * rewrite another, so those paths are classified from the command itself and
+ * the ones that cannot be settled are reported as neither.
+ */
+function filesTouched(block, repoRoot, isWrite) {
   const input = block?.input || {};
-  const out = new Set();
+  const writes = new Set();
+  const reads = new Set();
+  const unknown = new Set();
   for (const key of ["file_path", "path", "notebook_path"]) {
     const rel = repoRelative(repoRoot, input[key]);
-    if (rel) out.add(rel);
+    if (rel) (isWrite ? writes : reads).add(rel);
   }
-  for (const f of filesFromCommand(input.command, repoRoot)) out.add(f);
-  return out;
+  const shell = classifyCommand(input.command, repoRoot);
+  for (const f of shell.writes) writes.add(f);
+  for (const f of shell.reads) if (!writes.has(f)) reads.add(f);
+  for (const f of shell.unknown) if (!writes.has(f) && !reads.has(f)) unknown.add(f);
+  return { writes, reads, unknown };
 }
 
 function parseRun(file, repoRoot) {
@@ -69,6 +82,7 @@ function parseRun(file, repoRoot) {
   const id = path.basename(file).replace(/^agent-/, "").replace(/\.jsonl$/, "");
   const reads = new Set();
   const writes = new Set();
+  const unsure = new Set();
   let model = null;
   let effort = null;
   let tokens = 0;
@@ -102,11 +116,18 @@ function parseRun(file, repoRoot) {
       for (const b of msg.content) {
         if (b?.type !== "tool_use") continue;
         toolCalls++;
-        const kind = WRITE_TOOLS.has(b.name) ? "write" : "read";
-        const target = kind === "write" ? writes : reads;
-        for (const f of filesTouched(b, repoRoot)) {
-          target.add(f);
-          events.push({ path: f, kind, at: rec.timestamp || null });
+        const touched = filesTouched(b, repoRoot, WRITE_TOOLS.has(b.name));
+        for (const f of touched.writes) {
+          writes.add(f);
+          events.push({ path: f, kind: "write", at: rec.timestamp || null });
+        }
+        for (const f of touched.reads) {
+          reads.add(f);
+          events.push({ path: f, kind: "read", at: rec.timestamp || null });
+        }
+        for (const f of touched.unknown) {
+          unsure.add(f);
+          events.push({ path: f, kind: "touch", at: rec.timestamp || null });
         }
       }
     }
@@ -114,6 +135,9 @@ function parseRun(file, repoRoot) {
 
   // A file it wrote is not also counted as one it merely read.
   for (const w of writes) reads.delete(w);
+  // A path settled as read or written is no longer merely touched.
+  for (const w of writes) unsure.delete(w);
+  for (const r of reads) unsure.delete(r);
 
   // The sidecar carries the authoritative name and type.
   let meta = null;
@@ -141,6 +165,7 @@ function parseRun(file, repoRoot) {
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
     writes: [...writes].sort(),
+    touched: [...unsure].sort(),
     fileEvents: orderFileEvents(events),
     depth: meta?.spawnDepth ?? null,
   };

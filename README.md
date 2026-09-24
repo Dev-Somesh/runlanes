@@ -57,6 +57,15 @@ Edges are **observed from the transcripts**, not read from prompts. A run
 appears against a file because it opened it — a different claim from "its
 instructions said it would".
 
+Shell commands are read per path rather than per tool. `sed -i x.ts` is a
+write, `cat x.ts` is a read, and `cat a.ts > b.ts` is one of each. Where a
+command could mean anything — `./deploy.sh config.json`, or `git checkout --
+file` — the path is reported as **touched, effect not established**. It still
+counts as contact in the graph, and it is kept out of collisions, which ask the
+stronger question. A pattern confident enough to call `git checkout` a write
+would invent collisions that never happened, and a false incident costs a
+reader more than an unproven one.
+
 Sharing a file is a weaker claim than it looks: two runs reading the same
 config an hour apart share a file and were never in each other's way. A file
 shown in **red** is a **collision** — two runs both *wrote* it while both were

@@ -13,7 +13,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { statusFromLastWrite, orderFileEvents } from "./types.js";
-import { repoRelative, filesFromCommand, sameProject, walkFiles, listMarkdown } from "./read.js";
+import { repoRelative, classifyCommand, sameProject, walkFiles, listMarkdown } from "./read.js";
 
 function defaultRoot() {
   if (process.platform === "darwin") {
@@ -100,10 +100,14 @@ function filesFromAction(action, repoRoot) {
     const rel = kiroPath(input.file || input.path, repoRoot);
     if (rel) writes.add(rel);
   }
+  const unsure = new Set();
   if (type === "runCommand") {
-    for (const f of filesFromCommand(input.command, repoRoot)) reads.add(f);
+    const sh = classifyCommand(input.command, repoRoot);
+    for (const f of sh.writes) writes.add(f);
+    for (const f of sh.reads) reads.add(f);
+    for (const f of sh.unknown) unsure.add(f);
   }
-  return { reads, writes };
+  return { reads, writes, unsure };
 }
 
 function dirMtime(dir) {
@@ -175,6 +179,7 @@ function parseSession(file, repoRoot, executions) {
   const reads = new Set();
   const writes = new Set();
   const events = [];
+  const unsureAll = new Set();
   let toolCalls = 0;
   let turns = 0;
   let first = msIso(data.dateCreated);
@@ -212,10 +217,16 @@ function parseSession(file, repoRoot, executions) {
         writes.add(f);
         events.push({ path: f, kind: "write", at: null });
       }
+      for (const f of files.unsure || []) {
+        unsureAll.add(f);
+        events.push({ path: f, kind: "touch", at: null });
+      }
     }
   }
 
   for (const w of writes) reads.delete(w);
+  for (const w of writes) unsureAll.delete(w);
+  for (const r of reads) unsureAll.delete(r);
   first = first || last;
   const model = data.selectedModel && data.selectedModel !== "auto" ? data.selectedModel : data.defaultModelTitle || null;
 
@@ -237,6 +248,7 @@ function parseSession(file, repoRoot, executions) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    touched: [...unsureAll].sort(),
     fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth: 0,

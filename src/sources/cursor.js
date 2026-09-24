@@ -15,7 +15,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { statusFromLastWrite, orderFileEvents } from "./types.js";
-import { readJsonl, repoRelative, filesFromCommand } from "./read.js";
+import { readJsonl, repoRelative, classifyCommand } from "./read.js";
 
 const ROOT = path.join(os.homedir(), ".cursor", "projects");
 
@@ -62,8 +62,7 @@ function filesTouched(block, repoRoot) {
     }
     out.add(rel);
   }
-  for (const f of filesFromCommand(input.command, repoRoot)) out.add(f);
-  return out;
+  return { paths: out, shell: classifyCommand(input.command, repoRoot) };
 }
 
 function flattenText(rec) {
@@ -124,6 +123,7 @@ function parseRun(file, repoRoot, { depth, kind } = {}) {
   let first = null;
   let last = null;
   const events = [];
+  const unsure = new Set();
 
   for (const rec of records) {
     if (!model) model = extractModel(rec);
@@ -141,17 +141,32 @@ function parseRun(file, repoRoot, { depth, kind } = {}) {
       toolCalls++;
       const kind = WRITE_TOOLS.has(b.name) ? "write" : "read";
       const target = kind === "write" ? writes : reads;
-      for (const f of filesTouched(b, repoRoot)) {
+      const touched = filesTouched(b, repoRoot);
+      for (const f of touched.paths) {
         target.add(f);
         // Cursor stamps its user turns, not its tool calls. Where this record
         // carries no stamp the event says null rather than borrowing the last
         // one seen, which would read as a measurement.
         events.push({ path: f, kind, at: stamp || null });
       }
+      for (const f of touched.shell.writes) {
+        writes.add(f);
+        events.push({ path: f, kind: "write", at: stamp || null });
+      }
+      for (const f of touched.shell.reads) {
+        reads.add(f);
+        events.push({ path: f, kind: "read", at: stamp || null });
+      }
+      for (const f of touched.shell.unknown) {
+        unsure.add(f);
+        events.push({ path: f, kind: "touch", at: stamp || null });
+      }
     }
   }
 
   for (const w of writes) reads.delete(w);
+  for (const w of writes) unsure.delete(w);
+  for (const r of reads) unsure.delete(r);
 
   const mtimeIso = new Date(mtime).toISOString();
   first = first || mtimeIso;
@@ -177,6 +192,7 @@ function parseRun(file, repoRoot, { depth, kind } = {}) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    touched: [...unsure].sort(),
     fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth: depth ?? null,

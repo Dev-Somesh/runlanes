@@ -13,7 +13,10 @@ import { estimateCostUsd, sumCostUsd } from "./prices.js";
 export function sharedFiles(runs) {
   const touchedBy = new Map();
   for (const run of runs) {
-    for (const file of [...run.reads, ...run.writes]) {
+    // A file touched through a shell command whose effect could not be
+    // established is still contact, and belongs in the graph. It is only kept
+    // out of `collisions`, which asks the stronger question.
+    for (const file of [...run.reads, ...run.writes, ...(run.touched || [])]) {
       if (!touchedBy.has(file)) touchedBy.set(file, new Set());
       touchedBy.get(file).add(run.id);
     }

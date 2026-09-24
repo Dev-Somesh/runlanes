@@ -223,7 +223,7 @@ footer{padding:34px 0 0;font-size:.78rem;color:var(--faint);line-height:1.9}
 <section class="panel" id="p-graph" role="tabpanel" aria-labelledby="t-graph" hidden>
   <div class="card">
     <h2>Shared files</h2>
-    <p class="hint">Runs on the left, files two or more of them touched on the right — including across runners that are live on this project together. Edges are observed from the transcripts, not declared. Files only one run touched are that run's own territory and are listed with it instead. A file in <b style="color:var(--alert)">red</b> is a collision rather than contact: two runs both wrote it while both were running, so neither was working from a settled file. Which edit survived is a question for git — this says only that they were on the same ground at the same time.</p>
+    <p class="hint">Runs on the left, files two or more of them touched on the right — including across runners that are live on this project together. Edges are observed from the transcripts, not declared. Files only one run touched are that run's own territory and are listed with it instead. A path a shell command named without settling what it did is drawn as contact and listed with the run as not established, because a pattern confident enough to call <code>git checkout -- file</code> a write would invent collisions that never happened. A file in <b style="color:var(--alert)">red</b> is a collision rather than contact: two runs both wrote it while both were running, so neither was working from a settled file. Which edit survived is a question for git — this says only that they were on the same ground at the same time.</p>
     <svg id="graph" role="img" aria-label="Run and shared file graph"></svg>
   </div>
 </section>
@@ -670,6 +670,7 @@ function draw(d){
       </div>
       ${r.docs&&r.docs.length?`<div class="files"><b>Docs this run used</b>${r.docs.map(d=>esc(d.collection)+": "+esc(d.name)+(d.via==="kind"?" (agent type)":"")).join("<br>")}</div>`:""}
       ${r.own&&r.own.length?`<div class="files"><b>Files only this run touched</b>${r.own.slice(0,8).map(f=>esc(f)).join("<br>")}${r.own.length>8?`<br>+${r.own.length-8} more`:""}</div>`:""}
+      ${r.touched&&r.touched.length?`<div class="files"><b>Touched through a shell, effect not established</b>${r.touched.slice(0,8).map(f=>esc(f)).join("<br>")}${r.touched.length>8?`<br>+${r.touched.length-8} more`:""}</div>`:""}
     </article>`;
 
   document.getElementById("runs").innerHTML=now.length?now.map(s=>{

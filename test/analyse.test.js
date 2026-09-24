@@ -320,3 +320,28 @@ test("--since keeps a session whose own conversation was active, not just one th
   // and its tokens must reach the totals, or a CI assertion reads zero
   assert.equal(lifetime(filterSessions([soloRecent], cutoff)).mainTokens, 3_800_000);
 });
+
+// The case the report opened with: two runs that both rewrote a file through
+// the shell. Every shell-derived path used to be filed as a read, so neither
+// run held a write edge and the collision was invisible.
+test("two runs that rewrote a file through the shell now collide", () => {
+  const sed = (id, from, to) => ({
+    ...writing(id, "config.json", from, to),
+    writes: ["config.json"],
+    fileEvents: [{ path: "config.json", kind: "write", at: at(from + 1) }],
+  });
+  const [found] = collisions([sed("a", 0, 60), sed("b", 30, 90)]);
+  assert.equal(found.file, "config.json");
+  assert.deepEqual(found.runs.sort(), ["a", "b"]);
+});
+
+// The other half: a path the command could not be read either way is contact,
+// so it belongs in the graph, but it is not evidence of a collision.
+test("a file only touched through an unreadable command shares but does not collide", () => {
+  const runs = [
+    { id: "a", reads: [], writes: [], touched: ["config.json"], startedAt: at(0), lastActivityAt: at(60) },
+    { id: "b", reads: [], writes: [], touched: ["config.json"], startedAt: at(30), lastActivityAt: at(90) },
+  ];
+  assert.deepEqual(sharedFiles(runs), [{ file: "config.json", runs: ["a", "b"] }]);
+  assert.deepEqual(collisions(runs), []);
+});

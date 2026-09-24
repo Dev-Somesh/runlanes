@@ -16,7 +16,7 @@ import {
   readJsonl,
   readJsonlHead,
   repoRelative,
-  filesFromCommand,
+  classifyCommand,
   sameProject,
   walkFiles,
   listMarkdown,
@@ -107,6 +107,7 @@ function parseRun(file, repoRoot) {
   let toolCalls = 0;
   let turns = 0;
   const events = [];
+  const unsure = new Set();
   let first = iso(meta.timestamp) || iso(records[0]?.timestamp);
   let last = null;
   let usage = null;
@@ -150,15 +151,26 @@ function parseRun(file, repoRoot) {
           events.push({ path: rel, kind: "read", at });
         }
         const cmd = args.command || args.cmd;
-        for (const f of filesFromCommand(cmd, repoRoot)) {
+        const sh = classifyCommand(cmd, repoRoot);
+        for (const f of sh.writes) {
+          writes.add(f);
+          events.push({ path: f, kind: "write", at });
+        }
+        for (const f of sh.reads) {
           reads.add(f);
           events.push({ path: f, kind: "read", at });
+        }
+        for (const f of sh.unknown) {
+          unsure.add(f);
+          events.push({ path: f, kind: "touch", at });
         }
       }
     }
   }
 
   for (const w of writes) reads.delete(w);
+  for (const w of writes) unsure.delete(w);
+  for (const r of reads) unsure.delete(r);
 
   const input = usage?.input_tokens || 0;
   const cached = usage?.cached_input_tokens || 0;
@@ -185,6 +197,7 @@ function parseRun(file, repoRoot) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    touched: [...unsure].sort(),
     fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth: 0,

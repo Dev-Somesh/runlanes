@@ -12,7 +12,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { statusFromLastWrite, orderFileEvents } from "./types.js";
-import { readJsonl, repoRelative, filesFromCommand, listMarkdown } from "./read.js";
+import { readJsonl, repoRelative, classifyCommand, listMarkdown } from "./read.js";
 
 const HOME =
   process.env.GEMINI_DIR ||
@@ -81,9 +81,7 @@ function filesFromArgs(args, repoRoot) {
       if (rel) out.add(rel);
     }
   }
-  const cmd = args.command;
-  for (const f of filesFromCommand(cmd, repoRoot)) out.add(f);
-  return out;
+  return { paths: out, shell: classifyCommand(args.command, repoRoot) };
 }
 
 function runName(messages) {
@@ -124,6 +122,7 @@ function parseRun(file, repoRoot, { depth = 0, kind = null } = {}) {
   let toolCalls = 0;
   let turns = 0;
   const events = [];
+  const unsure = new Set();
   let first = iso(conv.startTime);
   let last = iso(conv.lastUpdated);
   let contextNow = 0;
@@ -152,14 +151,30 @@ function parseRun(file, repoRoot, { depth = 0, kind = null } = {}) {
     for (const call of calls) {
       toolCalls++;
       const target = WRITE_TOOLS.has(call.name) ? writes : reads;
-      for (const f of filesFromArgs(call.args, repoRoot)) {
+      const touched = filesFromArgs(call.args, repoRoot);
+      const at = msg.timestamp || null;
+      for (const f of touched.paths) {
         target.add(f);
-        events.push({ path: f, kind: target === writes ? "write" : "read", at: msg.timestamp || null });
+        events.push({ path: f, kind: target === writes ? "write" : "read", at });
+      }
+      for (const f of touched.shell.writes) {
+        writes.add(f);
+        events.push({ path: f, kind: "write", at });
+      }
+      for (const f of touched.shell.reads) {
+        reads.add(f);
+        events.push({ path: f, kind: "read", at });
+      }
+      for (const f of touched.shell.unknown) {
+        unsure.add(f);
+        events.push({ path: f, kind: "touch", at });
       }
     }
   }
 
   for (const w of writes) reads.delete(w);
+  for (const w of writes) unsure.delete(w);
+  for (const r of reads) unsure.delete(r);
   last = last || new Date(mtime).toISOString();
   first = first || last;
 
@@ -181,6 +196,7 @@ function parseRun(file, repoRoot, { depth = 0, kind = null } = {}) {
     lastActivityAt: last,
     durationMs: first && last ? new Date(last) - new Date(first) : null,
     reads: [...reads].sort(),
+    touched: [...unsure].sort(),
     fileEvents: orderFileEvents(events),
     writes: [...writes].sort(),
     depth,

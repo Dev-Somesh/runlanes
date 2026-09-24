@@ -67,6 +67,11 @@
  * @property {number|null} durationMs
  * @property {string[]} reads         Repo-relative paths.
  * @property {string[]} writes        Repo-relative paths.
+ * @property {string[]} [touched]     Paths a shell command named where neither
+ *   a read nor a write could be established. `sed -i x.ts` is a write and
+ *   `cat x.ts` is a read, but `./deploy.sh x.ts` is neither until something
+ *   says so. They count as contact in the shared-file graph and are kept out
+ *   of collisions, which asks the stronger question.
  * @property {FileEvent[]} [fileEvents]  The same contact, kept in the order the
  *   runner recorded it. `reads` and `writes` say a run touched a path; this says
  *   when, where the transcript was willing to say. Additive on purpose: the two
@@ -76,7 +81,7 @@
  *
  * @typedef {object} FileEvent
  * @property {string} path            Repo-relative.
- * @property {"read"|"write"} kind
+ * @property {"read"|"write"|"touch"} kind
  * @property {string|null} at         ISO timestamp, or null when the runner did
  *   not stamp the call. Null is the honest answer and not a zero: Cursor stamps
  *   its user turns rather than its tool calls, and Kiro times an execution
