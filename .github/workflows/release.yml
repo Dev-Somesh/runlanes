@@ -81,8 +81,15 @@ jobs:
           fi
           echo "runlanes@$PKG is unpublished."
 
+      # --ignore-scripts skips prepublishOnly, which runs this same suite a
+      # fourth time on a commit the matrix above already cleared on Node 18, 20
+      # and 22. It bought nothing and cost a release: an intermittent module
+      # resolution failure in ui.test.js, seen twice on CI and never once in 95
+      # local runs across two Node versions, failed the publish after every
+      # gate had passed. The gate is the matrix. The hook stays in package.json
+      # so a publish from a laptop is still guarded.
       - name: Publish
-        run: npm publish --provenance --access public
+        run: npm publish --provenance --access public --ignore-scripts
 
       # The tag alone leaves the Releases page showing whatever was last
       # published by hand, which is how it fell three versions behind. The
